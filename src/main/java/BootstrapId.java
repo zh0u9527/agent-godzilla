@@ -16,68 +16,130 @@ public class BootstrapId {
     public static void main(String[] args)
             throws IOException, AttachNotSupportedException, AgentLoadException, AgentInitializationException {
 
-        // 自动查找目标进程
-        String pid = findTargetPID();
+        printHelp(args);
 
-        // 获取当前 agent jar 路径
+        // Auto find target process
+        String pid = findTargetPID(args[0]);
+        if (pid == null) {
+            System.err.println("[-] Target PID not found.");
+            System.exit(1);
+        }
+
+        // Get the current agent jar path
         String jar = getJar(BootstrapId.class);
 
-        // 附加到目标进程
-        System.out.println("[+] 尝试附加到进程: " + pid);
+        // Attach to target process
+        System.out.println("[+] Trying to attach to process: " + pid);
         VirtualMachine vm = VirtualMachine.attach(pid);
         vm.loadAgent(jar);
         vm.detach();
 
-        System.out.println("[√] Agent 已成功加载到进程：" + pid);
+        System.out.println("[√] Agent successfully loaded into process: " + pid);
     }
 
-    /**
-     * 自动查找可注入的 Java 进程（支持 Tomcat / Spring Boot）
-     */
-    public static String findTargetPID() {
-        List<String> candidates = new ArrayList<>();
-        try {
-            Process process = Runtime.getRuntime().exec("jps -l");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+    public static void printHelp(String[] args) {
+        if (args.length != 1) {
+            System.err.println("Usage: java -jar xxx.jar [id|processName]");
+            System.err.println();
+            System.err.println("Examples:");
+            System.err.println("  java -jar xxx.jar 123456         # PID");
+            System.err.println("  java -jar xxx.jar web.jar        # processLine.contains(arg.toLowerCase(jarName))");
+            System.err.println("  java -jar xxx.jar Application    # processLine.contains(arg.toLowerCase(mainClassName))");
+            System.err.println();
+            System.err.println("Tips:");
+            System.err.println("  use jps -l to list Java processes");
+            System.err.println("  linux: ps -eo pid,cmd | grep '[j]ava'");
+            System.err.println("  windows: jps -l");
+            System.err.println("  godzilla:\n\tUser-Agent: Ioyrns\n\tpass: 123456");
+            System.exit(1); // 直接退出程序
+        }
+    }
 
+
+    /**
+     * 1、判断arg是否为字符串型数字，如果是则直接返回 *
+     * 2、判断当前系统类型，则执行jps -l（如果出现异常则执行ps -eo pid,cmd或执行Windows下的相关命令来获取进程列表）来检测是否包含arg参数值，如果是则返回进程列表中对应的进程id
+     */
+    public static String findTargetPID(String arg) {
+        // 1. Check if arg is a numeric PID
+        if (arg.matches("\\d+")) {
+            return arg;
+        }
+
+        List<String> candidates = new ArrayList<>();
+        String os = System.getProperty("os.name").toLowerCase();
+
+        try {
+            Process process;
+            if (os.contains("win")) {
+                // Windows: try jps -l first, fallback to wmic
+                try {
+                    process = Runtime.getRuntime().exec("jps -l");
+                } catch (Exception e) {
+                    process = Runtime.getRuntime().exec(
+                            new String[]{"cmd.exe", "/c", "wmic process where \"name='java.exe'\" get ProcessId,CommandLine"});
+                }
+            } else {
+                // Linux/macOS: try jps -l first, fallback to ps
+                try {
+                    process = Runtime.getRuntime().exec("jps -l");
+                } catch (Exception e) {
+                    process = Runtime.getRuntime().exec(new String[]{"bash", "-c", "ps -eo pid,cmd | grep '[j]ava'"});
+                }
+            }
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
-                String[] parts = line.split(" ");
-                if (parts.length < 2) continue;
+                line = line.trim();
+                if (line.isEmpty()) continue;
 
-                String pid = parts[0];
-                String mainClass = parts[1];
+                String pid = null;
+                String mainClass = null;
 
-                // 排除自身进程
+                // Parse jps -l output: PID MainClass
+                if (line.matches("^\\d+\\s+.+$")) {
+                    String[] parts = line.split("\\s+", 2);
+                    pid = parts[0];
+                    mainClass = parts[1];
+                } else {
+                    // Parse Windows wmic or ps output
+                    String[] parts = line.split("\\s+", 2);
+                    if (parts.length >= 2) {
+                        pid = parts[0];
+                        mainClass = parts[1];
+                    }
+                }
+
+                if (pid == null || mainClass == null) continue;
+
+                // Exclude self process
                 if (mainClass.contains("BootstrapId")) continue;
 
-                // 匹配常见 Java Web 程序
-                if (mainClass.contains("org.apache.catalina.startup.Bootstrap")   // Tomcat
-                        || mainClass.contains("org.springframework.boot.loader.JarLauncher") // Spring Boot
-                        || mainClass.toLowerCase().contains("spring")               // Spring-based
-                        || mainClass.toLowerCase().contains("com.application")) {       // 自定义 main
+                // Match target process
+                if (mainClass.toLowerCase().contains(arg.toLowerCase())) {
                     candidates.add(pid + " [" + mainClass + "]");
                 }
             }
 
             if (candidates.isEmpty()) {
-                System.err.println("[-] 未找到 Spring Boot 或 Tomcat 进程。请确保目标 JVM 已启动。");
+                System.err.println("[-] No target Java process found. Make sure JVM is running and argument is correct.");
                 return null;
             }
 
-            System.out.println("[*] 检测到候选 Java 进程：");
+            System.out.println("[*] Detected candidate Java processes:");
             for (String c : candidates) {
                 System.out.println("    " + c);
             }
 
-            // 默认取第一个候选（如果多个你也可以手动选择）
+            // Return the first candidate PID
             return candidates.get(0).split(" ")[0];
 
         } catch (Exception e) {
-            throw new RuntimeException("获取 JVM 进程列表失败: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to get JVM process list: " + e.getMessage(), e);
         }
     }
+
 
     /**
      * 获取当前类所在的 Jar 路径

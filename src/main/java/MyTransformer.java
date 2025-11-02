@@ -21,7 +21,6 @@ public class MyTransformer implements ClassFileTransformer {
             CtClass cc = pool.makeClass(new ByteArrayInputStream(classFileBuffer));
             CtMethod doFilter = cc.getDeclaredMethod("doFilter");
 
-            // 插入代码（复用缓存对象）
             doFilter.insertBefore(
                     "{ " +
                             "    javax.servlet.http.HttpServletRequest req = $1;" +
