@@ -18,9 +18,6 @@ public class BootstrapId {
 
         // 自动查找目标进程
         String pid = findTargetPID();
-        if (pid == null) {
-            throw new RuntimeException("未找到合适的 Java 目标进程（Tomcat 或 Spring Boot）");
-        }
 
         // 获取当前 agent jar 路径
         String jar = getJar(BootstrapId.class);
@@ -59,7 +56,7 @@ public class BootstrapId {
                 if (mainClass.contains("org.apache.catalina.startup.Bootstrap")   // Tomcat
                         || mainClass.contains("org.springframework.boot.loader.JarLauncher") // Spring Boot
                         || mainClass.toLowerCase().contains("spring")               // Spring-based
-                        || mainClass.toLowerCase().contains("application")) {       // 自定义 main
+                        || mainClass.toLowerCase().contains("com.application")) {       // 自定义 main
                     candidates.add(pid + " [" + mainClass + "]");
                 }
             }
