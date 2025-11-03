@@ -11,6 +11,7 @@ public class AgentMainTest {
             // 找到目标类并进行重转换
             if (clazz.getName().equals("org.apache.catalina.core.ApplicationFilterChain")) {
                 try {
+                    System.out.println("into ApplicationFilterChain");
                     inst.retransformClasses(clazz);
                 } catch (UnmodifiableClassException e) {
                     throw new RuntimeException(e);
