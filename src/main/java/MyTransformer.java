@@ -21,14 +21,6 @@ public class MyTransformer implements ClassFileTransformer {
             CtClass cc = pool.makeClass(new ByteArrayInputStream(classFileBuffer));
             CtMethod doFilter = cc.getDeclaredMethod("doFilter");
 
-            try {
-                Class.forName("com.filter.Log4jConfigPdFilter", false, loader);
-                System.out.println("[*] Log4jConfigPdFilter already exists, skipping hook.");
-                return null;
-            } catch (ClassNotFoundException e) {
-                // 类不存在，继续执行 insertBefore
-            }
-
             doFilter.insertBefore(
                     "{ " +
                             "    System.out.println(\"into doFilter\");" +

