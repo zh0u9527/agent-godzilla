@@ -51,6 +51,9 @@ public class BootstrapId {
             System.err.println("  linux: ps -eo pid,cmd | grep '[j]ava'");
             System.err.println("  windows: jps -l");
             System.err.println("  godzilla:\n\tUser-Agent: Ioyrns\n\tpassword: pass\n\tkey: key");
+            System.err.println();
+            System.err.println("  When starting the agent, the JDK version must match the JDK version of the target application.\n" +
+                    "For example, if the target project is running on JDK 17, the agent must also be started using JDK 17.");
             System.exit(1); // 直接退出程序
         }
     }
