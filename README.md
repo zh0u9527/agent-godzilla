@@ -15,7 +15,7 @@ jmg(java-memshell-generator) 项目整合agent。
   - InforSuite（中创）
   - TongWeb（东方通）
 # 2、原理
-原理是通过修改每个中间件在调用开发者自定义Filter之前的第一个中间件Filter来实现shell执行；所以，如果有遇到执行失败，请检查将对应的Web中间件调用开发者自定义Filter之前的第一个Filter加入到项目WEB_SERVER_LIST列表中即可。
+原理是通过修改每个中间件在调用开发者自定义Filter之前的第一个中间件Filter来实现shell执行；所以，如果有遇到agent注入失败，请检查将对应的Web中间件调用开发者自定义Filter之前的第一个Filter加入到项目WEB_SERVER_LIST列表中即可。
 
 注意事项
   - 运行agent时，应该确保运行agent的jdk版本与需要附件项目的jdk版本一致，否则会出现 Non-numeric value found - int expected
