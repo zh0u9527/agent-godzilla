@@ -1,10 +1,6 @@
-import com.sun.tools.attach.AgentInitializationException;
-import com.sun.tools.attach.AgentLoadException;
-import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.security.ProtectionDomain;
@@ -13,46 +9,52 @@ import java.util.List;
 
 public class BootstrapId {
 
-    public static void main(String[] args)
-            throws IOException, AttachNotSupportedException, AgentLoadException, AgentInitializationException {
+    public static void main(String[] args){
+        try {
+            printHelp(args);
 
-        printHelp(args);
+            // Auto find target process
+            String pid = findTargetPID(args[0]);
+            if (pid == null) {
+                AgentMainTest.logger.warning("[-] Target PID not found.");
+                System.exit(1);
+            }
 
-        // Auto find target process
-        String pid = findTargetPID(args[0]);
-        if (pid == null) {
-            System.err.println("[-] Target PID not found.");
-            System.exit(1);
+            // Get the current agent jar path
+            String jar = getJar(BootstrapId.class);
+
+            System.out.println("jar = " + jar);
+
+            // Attach to target process
+            AgentMainTest.logger.info("[+] Trying to attach to process: " + pid);
+            VirtualMachine vm = VirtualMachine.attach(pid);
+            vm.loadAgent(jar);
+            vm.detach();
+
+            AgentMainTest.logger.info("[√] Agent successfully loaded into process: " + pid);
         }
-
-        // Get the current agent jar path
-        String jar = getJar(BootstrapId.class);
-
-        // Attach to target process
-        System.out.println("[+] Trying to attach to process: " + pid);
-        VirtualMachine vm = VirtualMachine.attach(pid);
-        vm.loadAgent(jar);
-        vm.detach();
-
-        System.out.println("[√] Agent successfully loaded into process: " + pid);
+        catch (Exception e) {
+            AgentMainTest.logger.severe(e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
     public static void printHelp(String[] args) {
         if (args.length != 1) {
-            System.err.println("Usage: java -jar xxx.jar [id|processName]");
+            AgentMainTest.logger.info("Usage: java -jar xxx.jar [id|processName]");
+            System.out.println();
+            AgentMainTest.logger.info("Examples:");
+            AgentMainTest.logger.info("  java -jar xxx.jar 123456         # PID");
+            AgentMainTest.logger.info("  java -jar xxx.jar web.jar        # processLine.contains(arg.toLowerCase(jarName))");
+            AgentMainTest.logger.info("  java -jar xxx.jar Application    # processLine.contains(arg.toLowerCase(mainClassName))");
+            System.out.println();
+            AgentMainTest.logger.info("Tips:");
+            AgentMainTest.logger.info("  use jps -l to list Java processes");
+            AgentMainTest.logger.info("  linux: ps -eo pid,cmd | grep '[j]ava'");
+            AgentMainTest.logger.info("  windows: jps -l");
+            AgentMainTest.logger.info("  godzilla:\n\tUser-Agent: Ioyrns\n\tpassword: pass\n\tkey: key");
             System.err.println();
-            System.err.println("Examples:");
-            System.err.println("  java -jar xxx.jar 123456         # PID");
-            System.err.println("  java -jar xxx.jar web.jar        # processLine.contains(arg.toLowerCase(jarName))");
-            System.err.println("  java -jar xxx.jar Application    # processLine.contains(arg.toLowerCase(mainClassName))");
-            System.err.println();
-            System.err.println("Tips:");
-            System.err.println("  use jps -l to list Java processes");
-            System.err.println("  linux: ps -eo pid,cmd | grep '[j]ava'");
-            System.err.println("  windows: jps -l");
-            System.err.println("  godzilla:\n\tUser-Agent: Ioyrns\n\tpassword: pass\n\tkey: key");
-            System.err.println();
-            System.err.println("  When starting the agent, the JDK version must match the JDK version of the target application.\n" +
+            AgentMainTest.logger.info("  When starting the agent, the JDK version must match the JDK version of the target application.\n" +
                     "For example, if the target project is running on JDK 17, the agent must also be started using JDK 17.");
             System.exit(1); // 直接退出程序
         }
@@ -126,19 +128,20 @@ public class BootstrapId {
             }
 
             if (candidates.isEmpty()) {
-                System.err.println("[-] No target Java process found. Make sure JVM is running and argument is correct.");
+                AgentMainTest.logger.warning("[-] No target Java process found. Make sure JVM is running and argument is correct.");
                 return null;
             }
 
-            System.out.println("[*] Detected candidate Java processes:");
+            AgentMainTest.logger.info("[*] Detected candidate Java processes:");
             for (String c : candidates) {
-                System.out.println("    " + c);
+                AgentMainTest.logger.info("    " + c);
             }
 
             // Return the first candidate PID
             return candidates.get(0).split(" ")[0];
 
         } catch (Exception e) {
+            AgentMainTest.logger.severe(e.getMessage());
             throw new RuntimeException("Failed to get JVM process list: " + e.getMessage(), e);
         }
     }

