@@ -9,6 +9,10 @@ import java.util.List;
 
 public class BootstrapId {
 
+    /**
+     * 运行jar时，应该确保运行jar的jdk版本与需要附件项目的jdk版本一致，否则会出现 Non-numeric value found - int expected
+     * @param args
+     */
     public static void main(String[] args){
         try {
             printHelp(args);
