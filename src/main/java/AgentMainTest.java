@@ -28,10 +28,6 @@ public class AgentMainTest {
                 }
                 break;
             }
-            String ua = "";
-            if (ua != null && AgentMainTest.HEADER_PARAM_VALUE.toLowerCase().contains(ua.toLowerCase())){
-
-            }
         }
         logger.info("success...");
     }

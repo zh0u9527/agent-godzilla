@@ -27,8 +27,6 @@ public class BootstrapId {
             // Get the current agent jar path
             String jar = getJar(BootstrapId.class);
 
-            System.out.println("jar = " + jar);
-
             // Attach to target process
             AgentMainTest.logger.info("[+] Trying to attach to process: " + pid);
             VirtualMachine vm = VirtualMachine.attach(pid);
