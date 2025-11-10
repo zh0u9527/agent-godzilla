@@ -54,7 +54,7 @@ public class BootstrapId {
             AgentMainTest.logger.info("  use jps -l to list Java processes");
             AgentMainTest.logger.info("  linux: ps -eo pid,cmd | grep '[j]ava'");
             AgentMainTest.logger.info("  windows: jps -l");
-            AgentMainTest.logger.info("  godzilla:\n\tUser-Agent: Ioyrns\n\tpassword: pass\n\tkey: key");
+            AgentMainTest.logger.info("  godzilla:\n\t" +AgentMainTest.HEADER_PARAM+ ": " +AgentMainTest.HEADER_PARAM_VALUE+ "\n\tpassword: pass\n\tkey: key");
             System.err.println();
             AgentMainTest.logger.info("  When starting the agent, the JDK version must match the JDK version of the target application.\n" +
                     "For example, if the target project is running on JDK 17, the agent must also be started using JDK 17.");

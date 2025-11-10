@@ -56,9 +56,8 @@ public class AgentMainTest {
     // 请求头参数配置
     public static final String HEADER_PARAM = "User-Agent";
 
-    // 请求头参数值配置
-    public static final String HEADER_PARAM_VALUE = "Ioyrns";
-
+    // 请求头参数值配置，请求头UA参数值包含 HEADER_PARAM_VALUE 即可，不缺分大小写。
+    public static final String HEADER_PARAM_VALUE = "agent";
 
     public static final Logger logger = Logger.getLogger("AgentLogger");
 
