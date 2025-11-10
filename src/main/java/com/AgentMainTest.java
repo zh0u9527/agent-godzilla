@@ -23,9 +23,6 @@ public class AgentMainTest {
                     throw new RuntimeException(e);
                 }
                 break;
-            } else {
-                Constant001.logger.severe("No web middleware was found. Please confirm the web middleware and add the corresponding filter to com.Constant001#WEB_SRVER-LIST");
-                return;
             }
         }
         Constant001.logger.info("success...");

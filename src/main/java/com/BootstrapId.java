@@ -45,20 +45,20 @@ public class BootstrapId {
 
     public static void printHelp(String[] args) {
         if (args.length != 1) {
-            Constant001.logger.info("Usage: java -jar xxx.jar [id|processName]");
+            System.out.println("Usage: java -jar xxx.jar [id|processName]");
             System.out.println();
-            Constant001.logger.info("Examples:");
-            Constant001.logger.info("  java -jar xxx.jar 123456         # PID");
-            Constant001.logger.info("  java -jar xxx.jar web.jar        # processLine.contains(arg.toLowerCase(jarName))");
-            Constant001.logger.info("  java -jar xxx.jar Application    # processLine.contains(arg.toLowerCase(mainClassName))");
+            System.out.println("Examples:");
+            System.out.println("  java -jar xxx.jar 123456         # PID");
+            System.out.println("  java -jar xxx.jar web.jar        # processLine.contains(arg.toLowerCase(jarName))");
+            System.out.println("  java -jar xxx.jar Application    # processLine.contains(arg.toLowerCase(mainClassName))");
             System.out.println();
-            Constant001.logger.info("Tips:");
-            Constant001.logger.info("  use jps -l to list Java processes");
-            Constant001.logger.info("  linux: ps -eo pid,cmd | grep '[j]ava'");
-            Constant001.logger.info("  windows: jps -l");
-            Constant001.logger.info("  godzilla:\n\t" +Constant001.HEADER_PARAM+ ": " +Constant001.HEADER_PARAM_VALUE+ "\n\tpassword: "+ Constant001.PASSWORD +"\n\tkey: " + Constant001.SECRET_KEY + " ");
+            System.out.println("Tips:");
+            System.out.println("  use jps -l to list Java processes");
+            System.out.println("  linux: ps -eo pid,cmd | grep '[j]ava'");
+            System.out.println("  windows: jps -l");
+            System.out.println("  godzilla:\n\t" +Constant001.HEADER_PARAM+ ": " +Constant001.HEADER_PARAM_VALUE+ "\n\tpassword: "+ Constant001.PASSWORD +"\n\tkey: " + Constant001.SECRET_KEY + " ");
             System.err.println();
-            Constant001.logger.info("  When starting the agent, the JDK version must match the JDK version of the target application.\n" +
+            System.out.println("  When starting the agent, the JDK version must match the JDK version of the target application.\n" +
                     "For example, if the target project is running on JDK 17, the agent must also be started using JDK 17.");
             System.exit(1); // 直接退出程序
         }
