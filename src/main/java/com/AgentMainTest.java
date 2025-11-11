@@ -12,18 +12,24 @@ public class AgentMainTest {
         inst.addTransformer(new MyTransformer(), true);
 
         Constant001.logger.info("agent successfully loaded into agent");
+        boolean isFindWebMiddleware = false;
         // 遍历所有已加载的类
         for (Class<?> clazz : inst.getAllLoadedClasses()) {
             if (Constant001.WEB_SERVER_LIST.contains(clazz.getName())) {
                 try {
                     Constant001.logger.info("find web server " + clazz.getName());
                     inst.retransformClasses(clazz);
+                    isFindWebMiddleware = true;
                 } catch (UnmodifiableClassException e) {
                     Constant001.logger.severe("exception retransforming class: " + clazz.getName());
                     throw new RuntimeException(e);
                 }
                 break;
             }
+        }
+        if (!isFindWebMiddleware) {
+            Constant001.logger.severe("agent not found web middleware.");
+            return;
         }
         Constant001.logger.info("success...");
     }
